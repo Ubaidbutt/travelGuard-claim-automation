@@ -1,0 +1,237 @@
+{
+  "POL-7823419": {
+    "product_tier": "premium",
+    "status": "active",
+    "purchase_date": "2024-01-01",
+    "coverage_start": "2024-01-01",
+    "coverage_end": "2025-12-31",
+    "holder": {
+      "full_name": "Sarah Müller",
+      "date_of_birth": "1989-04-12",
+      "email": "sarah@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 100.00},
+      {"benefit": "medical", "limit": 100000.00, "deductible": 0.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 0,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 0.0
+    }
+  },
+
+  "POL-3156082": {
+    "product_tier": "basic",
+    "status": "expired",
+    "purchase_date": "2023-01-01",
+    "coverage_start": "2023-01-01",
+    "coverage_end": "2024-01-01",
+    "holder": {
+      "full_name": "Jan de Vries",
+      "date_of_birth": "1975-08-03",
+      "email": "jan@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 2000.00, "deductible": 200.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 1,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 350.0
+    }
+  },
+
+  "POL-9047253": {
+    "product_tier": "classic",
+    "status": "active",
+    "purchase_date": "2024-03-01",
+    "coverage_start": "2024-03-01",
+    "coverage_end": "2025-12-31",
+    "holder": {
+      "full_name": "Amira Hassan",
+      "date_of_birth": "1991-11-22",
+      "email": "amira@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 100.00},
+      {"benefit": "medical", "limit": 100000.00, "deductible": 0.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 3,
+      "claims_last_12_months": 2,
+      "prior_payouts_total": 2400.0
+    }
+  },
+
+  "POL-4512896": {
+    "product_tier": "basic",
+    "status": "active",
+    "purchase_date": "2024-06-01",
+    "coverage_start": "2024-06-01",
+    "coverage_end": "2025-12-31",
+    "holder": {
+      "full_name": "Pieter van Dam",
+      "date_of_birth": "1983-02-14",
+      "email": "pieter@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 1500.00, "deductible": 250.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 0,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 0.0
+    }
+  },
+
+  "POL-6734120": {
+    "product_tier": "premium",
+    "status": "active",
+    "purchase_date": "2024-02-15",
+    "coverage_start": "2024-02-15",
+    "coverage_end": "2026-02-14",
+    "holder": {
+      "full_name": "Isabelle Fontaine",
+      "date_of_birth": "1978-06-30",
+      "email": "isabelle.fontaine@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 15000.00, "deductible": 0.00},
+      {"benefit": "medical", "limit": 500000.00, "deductible": 0.00},
+      {"benefit": "baggage_loss", "limit": 3000.00, "deductible": 0.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 1,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 820.0
+    }
+  },
+
+  "POL-8293047": {
+    "product_tier": "premium",
+    "status": "active",
+    "purchase_date": "2024-04-10",
+    "coverage_start": "2024-04-10",
+    "coverage_end": "2026-04-09",
+    "holder": {
+      "full_name": "Nikolai Petrov",
+      "date_of_birth": "1986-09-17",
+      "email": "n.petrov@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 15000.00, "deductible": 0.00},
+      {"benefit": "medical", "limit": 500000.00, "deductible": 0.00},
+      {"benefit": "baggage_loss", "limit": 3000.00, "deductible": 0.00},
+      {"benefit": "adventure_sports_medical", "limit": 50000.00, "deductible": 0.00},
+      {"benefit": "rental_car_collision", "limit": 5000.00, "deductible": 500.00}
+    ],
+    "add_ons": ["adventure_sports", "rental_car"],
+    "claim_history": {
+      "total_claims": 0,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 0.0
+    }
+  },
+
+  "POL-1564783": {
+    "product_tier": "classic",
+    "status": "active",
+    "purchase_date": "2024-05-20",
+    "coverage_start": "2024-05-20",
+    "coverage_end": "2025-12-31",
+    "holder": {
+      "full_name": "Yuki Tanaka",
+      "date_of_birth": "1994-03-08",
+      "email": "yuki.tanaka@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 100.00},
+      {"benefit": "medical", "limit": 100000.00, "deductible": 0.00},
+      {"benefit": "rental_car_collision", "limit": 3000.00, "deductible": 250.00}
+    ],
+    "add_ons": ["rental_car"],
+    "claim_history": {
+      "total_claims": 2,
+      "claims_last_12_months": 1,
+      "prior_payouts_total": 1150.0
+    }
+  },
+
+  "POL-5981624": {
+    "product_tier": "classic",
+    "status": "suspended",
+    "purchase_date": "2024-01-15",
+    "coverage_start": "2024-01-15",
+    "coverage_end": "2025-12-31",
+    "holder": {
+      "full_name": "Marco Esposito",
+      "date_of_birth": "1971-12-01",
+      "email": "marco.esposito@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 100.00},
+      {"benefit": "medical", "limit": 100000.00, "deductible": 0.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 4,
+      "claims_last_12_months": 3,
+      "prior_payouts_total": 6800.0
+    }
+  },
+
+  "POL-2748391": {
+    "product_tier": "premium",
+    "status": "active",
+    "purchase_date": "2025-01-01",
+    "coverage_start": "2025-01-01",
+    "coverage_end": "2026-12-31",
+    "holder": {
+      "full_name": "Fatima Al-Rashidi",
+      "date_of_birth": "1982-07-19",
+      "email": "fatima.alrashidi@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 15000.00, "deductible": 0.00},
+      {"benefit": "medical", "limit": 500000.00, "deductible": 0.00},
+      {"benefit": "baggage_loss", "limit": 3000.00, "deductible": 0.00},
+      {"benefit": "adventure_sports_medical", "limit": 50000.00, "deductible": 0.00},
+      {"benefit": "business_equipment", "limit": 10000.00, "deductible": 200.00}
+    ],
+    "add_ons": ["adventure_sports", "business_equipment"],
+    "claim_history": {
+      "total_claims": 0,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 0.0
+    }
+  },
+
+  "POL-4163057": {
+    "product_tier": "basic",
+    "status": "active",
+    "purchase_date": "2025-03-10",
+    "coverage_start": "2025-03-10",
+    "coverage_end": "2026-03-09",
+    "holder": {
+      "full_name": "Lena Bergström",
+      "date_of_birth": "2000-01-25",
+      "email": "lena.bergstrom@example.com"
+    },
+    "coverage_limits": [
+      {"benefit": "trip_cancellation", "limit": 1500.00, "deductible": 250.00},
+      {"benefit": "medical", "limit": 30000.00, "deductible": 50.00}
+    ],
+    "add_ons": [],
+    "claim_history": {
+      "total_claims": 0,
+      "claims_last_12_months": 0,
+      "prior_payouts_total": 0.0
+    }
+  }
+}

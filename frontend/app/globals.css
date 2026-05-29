@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+}
+
+:root {
+  color-scheme: light;
+  --background: oklch(0.99 0.002 240);
+  --foreground: oklch(0.15 0.015 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.015 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.015 265);
+  --primary: oklch(0.545 0.218 264);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.004 265);
+  --secondary-foreground: oklch(0.20 0.012 265);
+  --muted: oklch(0.96 0.004 265);
+  --muted-foreground: oklch(0.50 0.015 265);
+  --accent: oklch(0.95 0.02 264);
+  --accent-foreground: oklch(0.38 0.18 264);
+  --destructive: oklch(0.60 0.22 25);
+  --border: oklch(0.91 0.006 265);
+  --input: oklch(0.96 0.004 265);
+  --ring: oklch(0.545 0.218 264);
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hero grid pattern */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Card shadows */
+  .shadow-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .shadow-glow {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.15);
+  }
+
+  /* Form inputs — light theme */
+  .input-dark {
+    @apply w-full px-3.5 py-3 text-sm rounded-xl bg-white border border-slate-200
+           text-slate-900 placeholder:text-slate-400
+           focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15
+           transition-all;
+    color: rgb(15 23 42);
+    -webkit-text-fill-color: rgb(15 23 42);
+  }
+  .input-dark::placeholder {
+    color: rgb(148 163 184);
+    -webkit-text-fill-color: rgb(148 163 184);
+  }
+  .input-dark[aria-invalid="true"] {
+    @apply border-red-400 ring-2 ring-red-500/15;
+  }
+
+  /* Legacy compat */
+  .shadow-google-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+}
