@@ -32,7 +32,7 @@ export function StepInsuranceDetails() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field id="departure_date" label="Departure date" error={errors.departure_date?.message}>
           <input id="departure_date" type="date" {...register('departure_date')}
             className={inputClass} aria-invalid={!!errors.departure_date} />
@@ -79,7 +79,7 @@ export function StepInsuranceDetails() {
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field id="cancellation_date" label="Cancellation date" error={errors.cancellation_date?.message}>
           <input id="cancellation_date" type="date" {...register('cancellation_date')}
             className={inputClass} aria-invalid={!!errors.cancellation_date} />
@@ -95,7 +95,7 @@ export function StepInsuranceDetails() {
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field id="total_cost" label="Total trip cost (€)" error={errors.total_cost?.message}>
           <input id="total_cost" type="number" step="0.01" min="0" placeholder="0.00"
             {...register('total_cost', { valueAsNumber: true })}

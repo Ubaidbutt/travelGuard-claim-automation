@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, Search } from 'lucide-react'
+import { Loader2, Search, AlertCircle } from 'lucide-react'
 import { ClaimResult } from '@/components/ClaimResult'
 import { useClaimStatus } from '@/hooks/useClaimStatus'
+import { ClaimNotFoundError } from '@/lib/api'
 
 export function StatusContent() {
   const searchParams = useSearchParams()
@@ -29,7 +30,10 @@ export function StatusContent() {
     }
   }
 
-  const errorMessage = error instanceof Error ? error.message : error ? 'Failed to fetch claim status' : undefined
+  const isNotFound = error instanceof ClaimNotFoundError
+  const genericErrorMessage = !isNotFound && error
+    ? (error instanceof Error ? error.message : 'Failed to fetch claim status')
+    : undefined
 
   return (
     <div className="space-y-5">
@@ -49,7 +53,8 @@ export function StatusContent() {
                 placeholder="e.g. CLM-A3F9K2X8"
                 autoComplete="off"
                 spellCheck={false}
-                className="input-dark w-full pl-9"
+                className="input-dark w-full"
+                style={{ paddingLeft: '2.25rem' }}
               />
             </div>
             <button
@@ -60,9 +65,26 @@ export function StatusContent() {
               {isFetching ? <Loader2 size={14} className="animate-spin" /> : 'Check status'}
             </button>
           </div>
-          {errorMessage && <p className="text-xs text-red-600 mt-2.5">{errorMessage}</p>}
+          {genericErrorMessage && <p className="text-xs text-red-600 mt-2.5">{genericErrorMessage}</p>}
         </form>
       </div>
+
+      {/* Claim not found error card */}
+      {isNotFound && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 overflow-hidden shadow-card">
+          <div className="px-6 py-5 flex items-start gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-red-100 shrink-0">
+              <AlertCircle size={20} className="text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-800">Claim ID not found</p>
+              <p className="text-sm text-red-700 mt-1 leading-relaxed">
+                We couldn&apos;t find a claim matching <span className="font-mono font-semibold">{activeId}</span>. Please double-check the reference number on your confirmation email and try again.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isFetching && !data && (
         <div className="flex flex-col items-center justify-center py-12 gap-3">

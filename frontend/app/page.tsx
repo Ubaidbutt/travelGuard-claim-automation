@@ -42,17 +42,17 @@ export default function Home() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[280px] bg-indigo-400/8 blur-[80px] rounded-full" />
         <div className="absolute top-10 left-1/4 w-[300px] h-[200px] bg-sky-400/6 blur-[60px] rounded-full" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-28 pb-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-28 pb-12 sm:pb-24">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-medium px-3.5 py-1.5 rounded-full mb-7">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
               Travel insurance · AI claims adjudication
             </div>
 
-            <h1 className="text-5xl sm:text-[60px] font-bold text-slate-900 tracking-tight leading-[1.06]">
+            <h1 className="text-4xl sm:text-5xl lg:text-[60px] font-bold text-slate-900 tracking-tight leading-[1.06]">
               Claims decided in{" "}
               <span className="text-gradient">seconds,</span>
-              <br />not days.
+              <br className="hidden sm:block" />{" "}not days.
             </h1>
 
             <p className="mt-6 text-slate-600 text-lg leading-relaxed max-w-xl">
@@ -86,7 +86,7 @@ export default function Home() {
 
       {/* ── Stats ── */}
       <section className="border-y border-slate-200 bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-bold text-slate-900">{s.value}</p>
@@ -98,7 +98,7 @@ export default function Home() {
       </section>
 
       {/* ── Claim Types ── */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="mb-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 mb-3">Travel insurance claims we cover</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight max-w-lg">
@@ -154,7 +154,7 @@ export default function Home() {
 
       {/* ── Problem ── */}
       <section className="border-t border-slate-200 bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-20 grid gap-12 lg:grid-cols-2 items-start">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 grid gap-8 sm:gap-12 lg:grid-cols-2 items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 mb-4">The problem</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
@@ -179,8 +179,8 @@ export default function Home() {
 
       {/* ── Pipeline ── */}
       <section className="border-t border-slate-200 bg-slate-50">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 mb-12">How it works</p>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 mb-8 sm:mb-12">How it works</p>
           <div className="relative">
             <div className="absolute left-[17px] top-2 bottom-2 w-px bg-slate-200 hidden sm:block" />
             <div className="space-y-5">
@@ -202,8 +202,8 @@ export default function Home() {
 
       {/* ── Features ── */}
       <section className="border-t border-slate-200 bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <div className="flex items-end justify-between mb-12 gap-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+          <div className="flex items-end justify-between mb-8 sm:mb-12 gap-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 mb-2">Built for insurers</p>
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight max-w-md">
@@ -250,8 +250,8 @@ export default function Home() {
 
       {/* ── Claimant CTA ── */}
       <section className="border-t border-slate-200 bg-slate-50">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 px-8 sm:px-12 py-12 grid gap-8 sm:grid-cols-[1fr_auto] items-center shadow-[0_8px_32px_rgba(99,102,241,0.3)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 sm:px-8 lg:px-12 py-10 sm:py-12 grid gap-8 sm:grid-cols-[1fr_auto] items-center shadow-[0_8px_32px_rgba(99,102,241,0.3)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200 mb-3">For claimants</p>
               <h2 className="text-2xl font-bold text-white mb-3">

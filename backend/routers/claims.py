@@ -27,5 +27,8 @@ async def get_claim(claim_id: str):
     db = get_db()
     case = await claim_service.get_by_claim_id(db, claim_id)
     if not case:
-        raise HTTPException(status_code=404, detail="Claim not found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"No claim found with ID '{claim_id}'. Please check your reference number and try again.",
+        )
     return ClaimStatusResponse(**case)

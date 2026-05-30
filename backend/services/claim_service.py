@@ -43,7 +43,7 @@ async def get_by_claim_id(db: Client, claim_id: str) -> dict | None:
         .maybe_single()
         .execute()
     )
-    return result.data
+    return result.data if result else None
 
 
 async def get_full_by_id(db: Client, case_id: str) -> dict | None:
@@ -54,7 +54,7 @@ async def get_full_by_id(db: Client, case_id: str) -> dict | None:
         .maybe_single()
         .execute()
     )
-    return result.data
+    return result.data if result else None
 
 
 async def update_decision(

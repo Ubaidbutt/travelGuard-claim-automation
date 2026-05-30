@@ -5,7 +5,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-slate-200 bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center w-5 h-5 rounded bg-indigo-600">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

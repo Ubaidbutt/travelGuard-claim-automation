@@ -178,7 +178,7 @@ export function ClaimForm({ claimType }: Props) {
       {/* Card */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden">
         {/* Card header */}
-        <div className="px-7 py-5 border-b border-slate-100">
+        <div className="px-4 py-4 sm:px-7 sm:py-5 border-b border-slate-100">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-base font-semibold text-slate-900">{STEP_TITLES[currentStep - 1]}</h2>
             {claimTypeLabel && (
@@ -190,7 +190,7 @@ export function ClaimForm({ claimType }: Props) {
           <p className="text-xs text-slate-500 mt-0.5">Step {currentStep} of {STEP_TITLES.length}</p>
         </div>
 
-        <div className="px-7 py-7">
+        <div className="px-4 py-5 sm:px-7 sm:py-7">
           <FormProvider {...methods}>
             <div>
               <div className="min-h-[300px]">

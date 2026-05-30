@@ -5,7 +5,7 @@ import { StatusContent } from "@/components/StatusContent"
 export default function StatusPage() {
   return (
     <div className="min-h-[calc(100vh-56px)] bg-slate-50">
-      <div className="max-w-xl mx-auto px-4 py-14">
+      <div className="max-w-xl mx-auto px-4 py-8 sm:py-14">
         <div className="flex flex-col items-center text-center mb-10">
           <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 mb-5">
             <ShieldCheck size={22} className="text-indigo-600" />

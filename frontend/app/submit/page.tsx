@@ -11,7 +11,7 @@ export default function SubmitPage() {
 
   return (
     <div className="min-h-[calc(100vh-56px)] bg-slate-50">
-      <div className="max-w-2xl mx-auto px-4 py-14">
+      <div className="max-w-2xl mx-auto px-4 py-8 sm:py-14">
 
         {/* Claim type selector */}
         <div className="mb-10">

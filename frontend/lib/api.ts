@@ -2,6 +2,13 @@ import type { ClaimCreatePayload, ClaimStatusResponse } from '@/types/claim'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+export class ClaimNotFoundError extends Error {
+  constructor(claimId: string) {
+    super(`No claim found for ID "${claimId}". Please check your reference number.`)
+    this.name = 'ClaimNotFoundError'
+  }
+}
+
 export async function submitClaim(
   payload: ClaimCreatePayload
 ): Promise<{ claim_id: string; status: string }> {
@@ -20,8 +27,8 @@ export async function submitClaim(
 export async function getClaimStatus(claimId: string): Promise<ClaimStatusResponse> {
   const res = await fetch(`${BASE_URL}/claims/${claimId}`)
   if (!res.ok) {
-    if (res.status === 404) throw new Error('Claim not found')
-    throw new Error('Failed to fetch claim status')
+    if (res.status === 404) throw new ClaimNotFoundError(claimId)
+    throw new Error('Failed to fetch claim status. Please try again.')
   }
   return res.json()
 }
