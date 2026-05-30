@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Check, Loader2 } from 'lucide-react'
 import { useState } from 'react'
-import { submitClaim } from '@/lib/api'
+import { submitClaim, validatePolicy } from '@/lib/api'
 import { getSlotsForReason } from '@/lib/documentSlots'
 import { CLAIM_TYPES } from '@/lib/claimTypes'
 import { claimFormSchema, type ClaimFormValues } from './schema'
@@ -19,7 +19,7 @@ import { StepReview } from './StepReview'
 const STEP_TITLES = ['Personal details', 'Trip details', 'Documents', 'Review & submit']
 
 const STEP_FIELDS: Record<number, (keyof ClaimFormValues)[]> = {
-  1: ['full_name', 'email', 'phone', 'policy_number'],
+  1: ['full_name', 'email', 'date_of_birth', 'phone', 'policy_number'],
   2: [
     'departure_date', 'return_date', 'destination_country', 'booking_reference',
     'cancellation_reason', 'cancellation_date', 'aware_of_reason_date',
@@ -39,6 +39,7 @@ export function ClaimForm({ claimType }: Props) {
   const [docError, setDocError] = useState<string>()
   const [submitError, setSubmitError] = useState<string>()
   const [submitting, setSubmitting] = useState(false)
+  const [validatingPolicy, setValidatingPolicy] = useState(false)
 
   const claimTypeLabel = CLAIM_TYPES.find((ct) => ct.id === claimType)?.label
 
@@ -54,7 +55,7 @@ export function ClaimForm({ claimType }: Props) {
     mode: 'onTouched',
   })
 
-  const { trigger, handleSubmit, watch, formState } = methods
+  const { trigger, handleSubmit, watch, formState, setError, getValues } = methods
 
   // Warn on navigate if the user has entered data
   useEffect(() => {
@@ -72,6 +73,21 @@ export function ClaimForm({ claimType }: Props) {
     if (fields.length > 0) {
       const valid = await trigger(fields as (keyof ClaimFormValues)[])
       if (!valid) return
+    }
+
+    if (currentStep === 1) {
+      const { policy_number, email, date_of_birth } = getValues()
+      setValidatingPolicy(true)
+      try {
+        await validatePolicy({ policy_number, email, date_of_birth })
+      } catch (err) {
+        setError('policy_number', {
+          message: err instanceof Error ? err.message : 'Unable to verify policy details',
+        })
+        return
+      } finally {
+        setValidatingPolicy(false)
+      }
     }
 
     if (currentStep === 3) {
@@ -229,9 +245,11 @@ export function ClaimForm({ claimType }: Props) {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="px-6 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-full hover:bg-indigo-500 transition-colors shadow-[0_4px_14px_rgba(99,102,241,0.3)]"
+                    disabled={validatingPolicy}
+                    className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-full hover:bg-indigo-500 transition-colors shadow-[0_4px_14px_rgba(99,102,241,0.3)] disabled:opacity-40 disabled:pointer-events-none"
                   >
-                    Continue
+                    {validatingPolicy && <Loader2 size={14} className="animate-spin" />}
+                    {validatingPolicy ? 'Verifying…' : 'Continue'}
                   </button>
                 ) : (
                   <button

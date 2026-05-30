@@ -24,6 +24,22 @@ export async function submitClaim(
   return res.json()
 }
 
+export async function validatePolicy(payload: {
+  policy_number: string
+  email: string
+  date_of_birth: string
+}): Promise<void> {
+  const res = await fetch(`${BASE_URL}/claims/validate-policy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error((err as { detail?: string }).detail ?? 'Unable to verify policy details')
+  }
+}
+
 export async function getClaimStatus(claimId: string): Promise<ClaimStatusResponse> {
   const res = await fetch(`${BASE_URL}/claims/${claimId}`)
   if (!res.ok) {

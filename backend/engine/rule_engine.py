@@ -94,7 +94,24 @@ def post_check(decision: ClaimDecision, policy: PolicySchedule) -> ClaimDecision
             f"reject<{settings.confidence_reject})."
         )
         logger.warning(note)
-        decision.full_reasoning += f"\n\n{note}"
+        decision.full_reasoning += f"\n\n{note}\nOriginal summary: {decision.summary}"
+
+        # Replace the user-facing summary so it matches the overridden decision.
+        if decision.decision == "approved":
+            decision.summary = (
+                "Your claim has been reviewed and approved for payment. "
+                "You will be contacted with further details about your payout."
+            )
+        elif decision.decision == "rejected":
+            decision.summary = (
+                "Your claim has been reviewed and could not be approved at this time. "
+                "Please contact support@travelguard.com if you have questions."
+            )
+        else:
+            decision.summary = (
+                "Your claim has been referred for additional review by our team. "
+                "An adjuster may contact you for further information or documentation."
+            )
 
     if decision.decision == "approved" and decision.approved_amount:
         limit = next(

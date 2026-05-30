@@ -11,7 +11,7 @@ Be precise. Ground every conclusion in the policy text or document evidence. Do 
 
 ## Decision thresholds — follow these exactly
 
-Set your `confidence` field to a value between 0.0 and 1.0 representing how confident you are that the claim is valid and payable. Then choose `decision` according to the table below:
+Set your `confidence` field to a value between 0.0 and 1.0 representing the **probability that this claim should be approved and paid**. This is NOT how certain you feel about your assessment — it is the likelihood of approval. A claim you are certain should be rejected has confidence near 0.0, not near 1.0. Then choose `decision` according to the table below, and make sure `decision` is always consistent with `confidence`:
 
 | Confidence | Decision |
 |---|---|

@@ -28,9 +28,14 @@ export function StepPersonalDetails() {
           className={inputClass} aria-invalid={!!errors.full_name} />
       </Field>
 
-      <Field id="email" label="Email address" error={errors.email?.message}>
+      <Field id="email" label="Email registered with your insurer" error={errors.email?.message}>
         <input id="email" type="email" {...register('email')} placeholder="jane@example.com"
           className={inputClass} aria-invalid={!!errors.email} />
+      </Field>
+
+      <Field id="date_of_birth" label="Date of birth" error={errors.date_of_birth?.message}>
+        <input id="date_of_birth" type="date" {...register('date_of_birth')}
+          className={inputClass} aria-invalid={!!errors.date_of_birth} />
       </Field>
 
       <Field id="phone" label="Phone number" error={errors.phone?.message}>

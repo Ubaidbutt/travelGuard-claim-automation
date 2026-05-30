@@ -9,6 +9,7 @@ export const claimFormSchema = z.object({
   // Step 1 — Personal details
   full_name:     z.string().min(2, 'Name must be at least 2 characters'),
   email:         z.string().email('Invalid email address'),
+  date_of_birth: z.string().min(1, 'Date of birth is required'),
   phone:         z.string().min(7, 'Invalid phone number'),
   policy_number: z.string().min(1, 'Policy number is required'),
 
@@ -33,6 +34,21 @@ export const claimFormSchema = z.object({
 
   // Step 3 — Attachments (keyed by document_type / slot.id)
   attachments: z.record(z.string(), uploadedFile.optional()),
+}).superRefine((data, ctx) => {
+  if (data.departure_date && data.return_date && data.return_date < data.departure_date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Return date must be on or after departure date',
+      path: ['return_date'],
+    })
+  }
+  if (data.cancellation_date && data.aware_of_reason_date && data.aware_of_reason_date > data.cancellation_date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Must be on or before your cancellation date',
+      path: ['aware_of_reason_date'],
+    })
+  }
 })
 
 export type ClaimFormValues = z.infer<typeof claimFormSchema>

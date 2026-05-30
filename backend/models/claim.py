@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from datetime import date
 from decimal import Decimal
 from typing import Literal
@@ -57,6 +57,14 @@ class ClaimCreateRequest(BaseModel):
     # Attachments — uploaded to Supabase Storage by frontend before this call
     attachments: list[AttachmentInput] = []
 
+    @model_validator(mode='after')
+    def validate_dates(self) -> 'ClaimCreateRequest':
+        if self.return_date < self.departure_date:
+            raise ValueError('return_date must be on or after departure_date')
+        if self.aware_of_reason_date > self.cancellation_date:
+            raise ValueError('aware_of_reason_date must be on or before cancellation_date')
+        return self
+
 
 class ClaimCase(BaseModel):
     """Full claim record as returned from the database."""
@@ -100,3 +108,9 @@ class ClaimStatusResponse(BaseModel):
     approved_amount: float | None
     created_at: str
     updated_at: str
+
+
+class PolicyValidateRequest(BaseModel):
+    policy_number: str
+    email: EmailStr
+    date_of_birth: date
