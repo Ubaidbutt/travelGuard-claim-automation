@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # Anthropic
     anthropic_api_key: str
-    claude_model: str = "claude-sonnet-4-20250514"
+    claude_model: str = "claude-sonnet-4-6"
 
     # Pipeline — single source of truth for confidence thresholds.
     # These values are injected into the system prompt template and used

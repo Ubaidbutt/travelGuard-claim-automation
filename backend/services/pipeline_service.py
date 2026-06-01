@@ -27,7 +27,7 @@ async def process(case_id: str) -> None:
         print(f"Processing case {case_id} for policy {case.policy_number} with tier {policy_schedule.product_tier}")
 
         # 3. Fetch policy wording for this tier
-        policy_wording = get_mock_wording(policy_schedule.product_tier)
+        policy_wording = get_mock_wording()
 
         # 4. Rule engine pre-checks — skip LLM if a hard rejection applies
         violation = pre_check(case, policy_schedule)

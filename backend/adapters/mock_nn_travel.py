@@ -36,10 +36,9 @@ def _extract_master_policy_text() -> str:
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
 
-def get_mock_wording(product_tier: str) -> PolicyWording:
+def get_mock_wording() -> PolicyWording:
     return PolicyWording(
         insurer_id="nn_travel",
-        product_tier=product_tier,
         version="2025.1",
         extracted_text=_extract_master_policy_text(),
     )

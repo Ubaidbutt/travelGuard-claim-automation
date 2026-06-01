@@ -36,6 +36,5 @@ class PolicySchedule(BaseModel):
 
 class PolicyWording(BaseModel):
     insurer_id: str
-    product_tier: str
     version: str
     extracted_text: str  # full wording text passed to Claude
