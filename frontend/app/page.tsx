@@ -60,13 +60,13 @@ export default function Home() {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <a
-                href="mailto:hello@travelguard.com"
+              <Link
+                href="/demo"
                 className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-[0_4px_16px_rgba(99,102,241,0.35)]"
               >
-                Request a demo
+                Live demo
                 <ArrowRight size={15} />
-              </a>
+              </Link>
               <Link
                 href="/submit"
                 className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:border-slate-400 hover:bg-slate-50 transition-all"

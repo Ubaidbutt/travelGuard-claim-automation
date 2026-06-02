@@ -75,8 +75,13 @@ async def process(case_id: str) -> None:
             db, case_id, status="rejected", summary=str(e), approved_amount=None
         )
     except LLMAssessmentError as e:
+        print(f"LLM assessment error for case {case_id}: {e}")
         await update_decision(
-            db, case_id, status="failed", summary=str(e), approved_amount=None
+            db,
+            case_id,
+            status="failed",
+            summary="Something went wrong while processing your claim. Please check back later.",
+            approved_amount=None,
         )
     except Exception as e:
         await update_decision(

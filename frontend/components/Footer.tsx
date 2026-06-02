@@ -21,6 +21,9 @@ export function Footer() {
           <Link href="/" className="text-xs text-slate-500 hover:text-slate-800 transition-colors">
             Home
           </Link>
+          <Link href="/demo" className="text-xs text-slate-500 hover:text-slate-800 transition-colors">
+            Live demo
+          </Link>
           <Link href="/submit" className="text-xs text-slate-500 hover:text-slate-800 transition-colors">
             Submit claim
           </Link>

@@ -11,7 +11,7 @@
       "email": "sarah@example.com"
     },
     "coverage_limits": [
-      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 100.00},
+      {"benefit": "trip_cancellation", "limit": 5000.00, "deductible": 0.00},
       {"benefit": "medical", "limit": 100000.00, "deductible": 0.00}
     ],
     "add_ons": [],

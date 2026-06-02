@@ -39,6 +39,10 @@ export default function RootLayout({
                 <Link href="/" className="hidden sm:block px-3.5 py-1.5 text-sm text-slate-600 font-medium rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-all">
                   Home
                 </Link>
+                <Link href="/demo" className="px-2.5 py-1.5 sm:px-3.5 text-sm text-indigo-600 font-medium rounded-lg hover:text-indigo-700 hover:bg-indigo-50 transition-all">
+                  <span className="sm:hidden">Demo</span>
+                  <span className="hidden sm:inline">Live demo</span>
+                </Link>
                 <Link href="/submit" className="px-2.5 py-1.5 sm:px-3.5 text-sm text-slate-600 font-medium rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-all">
                   <span className="sm:hidden">Submit</span>
                   <span className="hidden sm:inline">Submit claim</span>

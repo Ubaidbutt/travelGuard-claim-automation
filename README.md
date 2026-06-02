@@ -37,6 +37,7 @@ Claimant (browser)
       ▼
   Next.js 16 Frontend
   ├── / (landing page)
+  ├── /demo (live demo — 4 pre-built profiles, real pipeline, animated step visualisation)
   ├── /submit (4-step claim form + document uploads to Supabase Storage)
   └── /status (claim reference lookup + result display)
       │
@@ -152,6 +153,8 @@ claim-automation/
 │   │   ├── rule_engine.py             pre_check() + post_check()
 │   │   └── prompts/
 │   │       └── claim_assessment_system_prompt.txt
+│   ├── scripts/
+│   │   └── upload_demo_docs.py        Generates + uploads demo PDFs to Supabase Storage
 │   ├── models/
 │   │   ├── claim.py                   ClaimCreateRequest, ClaimCase, ClaimStatusResponse
 │   │   ├── policy.py                  PolicySchedule, PolicyWording
@@ -168,6 +171,7 @@ claim-automation/
     ├── app/
     │   ├── layout.tsx                 Root layout, TanStack Query provider
     │   ├── page.tsx                   / — Marketing landing page
+    │   ├── demo/page.tsx              /demo — live demo with pipeline visualisation
     │   ├── submit/page.tsx            /submit — redirects into ClaimForm
     │   └── status/page.tsx            /status — claim lookup + result
     ├── components/
@@ -186,6 +190,7 @@ claim-automation/
     │   ├── api.ts                     submitClaim(), getClaimStatus()
     │   ├── storage.ts                 Supabase Storage upload helper
     │   ├── documentSlots.ts           Document slot config per cancellation reason
+    │   ├── demoProfiles.ts            4 demo profiles with hardcoded doc URLs + policy details
     │   └── claimTypes.ts              Claim type cards for landing page
     ├── hooks/
     │   └── useClaimStatus.ts
@@ -315,7 +320,7 @@ Use these policy numbers in the claim form to test different scenarios:
 
 | Policy number | Holder | Tier | Status | Trip cancellation limit | Scenario |
 |---|---|---|---|---|---|
-| `POL-7823419` | Sarah Müller | Premium | Active | €5,000 | Clean active policy, no prior claims |
+| `POL-7823419` | Sarah Müller | Premium | Active | €5,000 | Clean active policy, no prior claims, €0 deductible |
 | `POL-3156082` | Jan de Vries | Basic | **Expired** | €2,000 | Triggers `expired_policy` rule rejection |
 | `POL-9047253` | Amira Hassan | Classic | Active | €5,000 | Active but 3 prior claims (2 in last 12 months) |
 | `POL-4512896` | Pieter van Dam | Basic | Active | €1,500 | Basic tier, €250 deductible |

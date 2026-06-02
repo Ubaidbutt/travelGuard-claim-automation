@@ -96,7 +96,7 @@ def _user_content(
         "text": (
             f"## POLICY WORDING\n"
             f"Insurer: {policy_wording.insurer_id}\n"
-            f"Tier: {policy_wording.product_tier} | Version: {policy_wording.version}\n\n"
+            f"Version: {policy_wording.version}\n\n"
             f"{policy_wording.extracted_text}"
         ),
         "cache_control": {"type": "ephemeral"},
