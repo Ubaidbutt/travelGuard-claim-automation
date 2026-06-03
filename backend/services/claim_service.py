@@ -38,12 +38,27 @@ async def create(db: Client, payload: ClaimCreateRequest) -> dict:
 async def get_by_claim_id(db: Client, claim_id: str) -> dict | None:
     result = (
         db.table("claim_case")
-        .select("claim_id, status, decision_summary, approved_amount, created_at, updated_at")
+        .select("claim_id, status, decision_summary, approved_amount, created_at, updated_at, assessment_detail")
         .eq("claim_id", claim_id)
         .maybe_single()
         .execute()
     )
-    return result.data if result else None
+    if not result or not result.data:
+        return None
+    data = dict(result.data)
+    ad = data.pop("assessment_detail", None)
+    if ad:
+        er = ad.get("evidence_report", {})
+        pc = ad.get("policy_compliance", {})
+        data["feedback"] = {
+            "evidence_quality": er.get("evidence_quality", ""),
+            "missing_documents": er.get("missing_expected_documents", []),
+            "discrepancies": er.get("cross_document_discrepancies", []),
+            "reason_covered": pc.get("reason_is_covered", True),
+            "evidence_sufficient": pc.get("evidence_sufficient", True),
+            "compliance_notes": pc.get("compliance_notes", ""),
+        }
+    return data
 
 
 async def get_full_by_id(db: Client, case_id: str) -> dict | None:

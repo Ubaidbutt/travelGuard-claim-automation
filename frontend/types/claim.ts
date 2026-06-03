@@ -16,6 +16,15 @@ export interface ClaimCreatePayload {
   attachments: { document_type: string; file_url: string; file_name: string }[]
 }
 
+export interface ClaimFeedback {
+  evidence_quality: 'strong' | 'adequate' | 'weak' | 'insufficient' | string
+  missing_documents: string[]
+  discrepancies: string[]
+  reason_covered: boolean
+  evidence_sufficient: boolean
+  compliance_notes: string
+}
+
 export interface ClaimStatusResponse {
   claim_id: string
   status: 'pending' | 'processing' | 'approved' | 'rejected' | 'needs_more_info' | 'failed'
@@ -23,4 +32,5 @@ export interface ClaimStatusResponse {
   approved_amount: number | null
   created_at: string
   updated_at: string
+  feedback?: ClaimFeedback | null
 }

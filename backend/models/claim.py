@@ -103,6 +103,15 @@ class ClaimCreateResponse(BaseModel):
     status: str
 
 
+class ClaimFeedback(BaseModel):
+    evidence_quality: str
+    missing_documents: list[str]
+    discrepancies: list[str]
+    reason_covered: bool
+    evidence_sufficient: bool
+    compliance_notes: str
+
+
 class ClaimStatusResponse(BaseModel):
     claim_id: str
     status: str
@@ -110,6 +119,7 @@ class ClaimStatusResponse(BaseModel):
     approved_amount: float | None
     created_at: str
     updated_at: str
+    feedback: ClaimFeedback | None = None
 
 
 class PolicyValidateRequest(BaseModel):
