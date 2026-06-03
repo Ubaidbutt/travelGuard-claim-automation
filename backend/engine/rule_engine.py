@@ -128,4 +128,20 @@ def post_check(decision: ClaimDecision, policy: PolicySchedule) -> ClaimDecision
                 f" Approved amount capped at policy limit of €{limit:,.2f}."
             )
 
+    if (
+        decision.decision == "approved"
+        and decision.approved_amount is not None
+        and decision.approved_amount > settings.human_review_threshold
+    ):
+        logger.info(
+            f"[post_check] Approved amount €{decision.approved_amount:.2f} exceeds "
+            f"human review threshold €{settings.human_review_threshold:.2f} — routing to manual review."
+        )
+        decision.decision = "needs_more_info"
+        decision.summary = (
+            f"Your claim for €{decision.approved_amount:,.2f} has been provisionally approved "
+            "but requires manual sign-off due to the claim amount. "
+            "An adjuster will contact you within 2 business days to confirm payment."
+        )
+
     return decision

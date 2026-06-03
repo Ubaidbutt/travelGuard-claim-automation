@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # by the rule engine post-check, so both stay in sync automatically.
     confidence_approve: float = 0.80
     confidence_reject: float = 0.50
+    human_review_threshold: float = 2500.0  # approved amounts above this (EUR) route to manual review
 
     # Demo protection
     demo_rate_limit: int = 5        # max demo runs per IP per hour

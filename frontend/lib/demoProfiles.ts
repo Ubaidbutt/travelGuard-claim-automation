@@ -70,7 +70,7 @@ export function getDemoProfiles(): DemoProfile[] {
         cancellation_reason: 'illness_claimant',
         cancellation_date: cancellation,
         aware_of_reason_date: awareOf,
-        total_cost: 3200,
+        total_cost: 1000,
         already_refunded: 0,
         description:
           'I was admitted to Munich General Hospital with acute appendicitis seven days before my scheduled departure. My surgeon, Dr. Klaus Weber, performed an emergency appendectomy and issued a medical certificate confirming I am unfit to travel for six weeks. The trip is entirely non-refundable. I have attached the physician statement, booking confirmation, and cancellation proof.',

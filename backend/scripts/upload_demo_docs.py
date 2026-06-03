@@ -183,11 +183,11 @@ def booking_confirmation(
     _section(pdf, "Cost Summary")
     pdf.set_font("Helvetica", "", 10)
     pdf.cell(120, 6, "Flights (return, economy class)")
-    pdf.cell(0, 6, "EUR 890.00", ln=True, align="R")
+    pdf.cell(0, 6, "EUR 450.00", ln=True, align="R")
     pdf.cell(120, 6, "Hotel accommodation (10 nights, B&B)")
-    pdf.cell(0, 6, "EUR 1,850.00", ln=True, align="R")
+    pdf.cell(0, 6, "EUR 450.00", ln=True, align="R")
     pdf.cell(120, 6, "Travel services & fees")
-    pdf.cell(0, 6, "EUR 460.00", ln=True, align="R")
+    pdf.cell(0, 6, "EUR 100.00", ln=True, align="R")
     pdf.set_line_width(0.3)
     pdf.line(20, pdf.get_y(), 190, pdf.get_y())
     pdf.ln(2)
@@ -394,7 +394,7 @@ def main() -> None:
         # Scenario 1: Clean approval
         "demo/approval/physician_statement.pdf": physician_statement_approval(),
         "demo/approval/booking_confirmation.pdf": booking_confirmation(
-            "Sarah Müller", "BK-DEMO-001", "Italy", "EUR3,200.00"
+            "Sarah Müller", "BK-DEMO-001", "Italy", "EUR1,000.00"
         ),
         "demo/approval/cancellation_proof.pdf": cancellation_proof(
             "Sarah Müller", "BK-DEMO-001", "Italy"
