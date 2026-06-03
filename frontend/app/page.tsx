@@ -1,6 +1,6 @@
 import Link from "next/link"
 import {
-  ShieldCheck, Users, BarChart3, FileSearch, Layers, ArrowRight, Clock, Mail,
+  ShieldCheck, Users, BarChart3, FileSearch, Layers, Scale, ArrowRight, Clock, Mail,
 } from "lucide-react"
 import { CLAIM_TYPES } from "@/lib/claimTypes"
 
@@ -13,17 +13,19 @@ const stats = [
 
 const pipeline = [
   { step: "01", title: "Policy retrieval", body: "The claimant's policy schedule is fetched from the insurer's systems — tier, limits, purchase date, and claim history." },
-  { step: "02", title: "Eligibility checks", body: "Deterministic rules run first: policy status, filing window, foreseeable event test, net claim value. Clear rejections are resolved immediately." },
-  { step: "03", title: "Intelligent document assessment", body: "The system reads the actual policy wording and all uploaded proof. It extracts facts, cross-references them against the claim, and assesses coverage compliance." },
-  { step: "04", title: "Structured decision", body: "A validated decision is produced — approved, rejected, or referred — with a confidence score, approved amount, and plain-language summary." },
-  { step: "05", title: "Full audit trail", body: "Every status transition and decision outcome is logged. Adjusters get a complete structured summary for every case, whether automated or human-reviewed." },
+  { step: "02", title: "Eligibility checks", body: "Deterministic rules run first: policy status, filing window, foreseeable event test, net claim value. Clear rejections are resolved immediately without an AI call." },
+  { step: "03", title: "Evidence analysis", body: "A dedicated AI model reads every uploaded document, extracts key facts, cross-references names and dates against the claim form, identifies missing evidence, and produces a structured evidence report." },
+  { step: "04", title: "Policy adjudication", body: "A second AI model receives the evidence report alongside the full policy wording. It interprets coverage clauses against structured facts — never reasoning from raw documents directly — and sets a calibrated confidence score." },
+  { step: "05", title: "Structured decision", body: "A validated decision is produced — approved, rejected, or referred — with a confidence score, approved amount, and plain-language summary for the claimant." },
+  { step: "06", title: "Full audit trail", body: "Both AI pass outputs, every status transition, and the full decision are logged. Adjusters get a complete structured summary for every case, whether automated or human-reviewed." },
 ]
 
 const features = [
   { icon: FileSearch, title: "Policy wording as source of truth", body: "The system reasons against the actual policy document, not a pre-extracted rule list. Coverage decisions reflect the precise wording in effect at purchase." },
   { icon: ShieldCheck, title: "Deterministic rule enforcement", body: "Eligibility checks, filing windows, and coverage caps are enforced by a rule engine that operates independently of the AI layer — always auditable." },
+  { icon: Scale, title: "Two-stage AI reasoning", body: "Evidence extraction and policy adjudication run as separate AI passes. The first model reads documents and structures the facts; the second applies the policy. Separating these tasks improves accuracy on complex and ambiguous claims." },
   { icon: Users, title: "Human-in-the-loop routing", body: "Low-confidence and high-risk cases are escalated with a full decision summary. Your team focuses only on cases that need human judgment." },
-  { icon: BarChart3, title: "Compliance-ready audit trail", body: "Every decision outcome, rule result, and status transition is logged with timestamps. Built to meet the evidential requirements of regulated claims handling." },
+  { icon: BarChart3, title: "Compliance-ready audit trail", body: "Every decision outcome, both AI pass outputs, and every status transition are logged with timestamps. Built to meet the evidential requirements of regulated claims handling." },
   { icon: Layers, title: "Insurer integration layer", body: "Each insurer connects via a dedicated adapter. Adding a new insurer or claim type does not change the core processing pipeline." },
 ]
 

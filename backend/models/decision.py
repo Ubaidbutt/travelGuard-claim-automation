@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal
 
 
@@ -9,6 +9,16 @@ class DocumentExtraction(BaseModel):
     discrepancies: list[str]
 
 
+class EvidenceReport(BaseModel):
+    """Output of Pass 1 — Evidence Analyst. Structured briefing passed to the adjudicator."""
+    document_extractions: list[DocumentExtraction]
+    cross_document_discrepancies: list[str]
+    missing_expected_documents: list[str]
+    fraud_signals: list[str]
+    evidence_quality: Literal["strong", "adequate", "weak", "insufficient"]
+    evidence_narrative: str
+
+
 class PolicyComplianceCheck(BaseModel):
     reason_is_covered: bool
     evidence_sufficient: bool
@@ -17,11 +27,8 @@ class PolicyComplianceCheck(BaseModel):
 
 
 class ClaimDecision(BaseModel):
-    """
-    Structured output schema returned by Claude via .with_structured_output().
-    LangChain validates and parses this automatically — no manual JSON parsing.
-    """
-    document_extractions: list[DocumentExtraction]
+    """Output of Pass 2 — Policy Adjudicator."""
+    document_extractions: list[DocumentExtraction] = Field(default_factory=list)
     policy_compliance: PolicyComplianceCheck
     decision: Literal["approved", "rejected", "needs_more_info"]
     confidence: float  # 0.0 to 1.0

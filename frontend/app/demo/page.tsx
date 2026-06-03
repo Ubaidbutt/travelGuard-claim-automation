@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   ArrowRight, Loader2, FileText, Paperclip,
   TrendingUp, TrendingDown, HelpCircle, Info,
-  Database, ShieldCheck, FileSearch, Zap, BookOpen, Check,
+  Database, ShieldCheck, FileSearch, Scale, Zap, BookOpen, Check,
 } from 'lucide-react'
 import { ClaimResult } from '@/components/ClaimResult'
 import { useClaimStatus } from '@/hooks/useClaimStatus'
@@ -31,10 +31,17 @@ const PIPELINE_STEPS = [
   },
   {
     icon: FileSearch,
-    label: 'Document assessment',
-    waitingDetail: 'AI reads policy wording and proof documents',
-    activeDetail: 'Analysing documents against the full policy wording…',
-    doneDetail: 'Documents assessed',
+    label: 'Evidence analysis',
+    waitingDetail: 'AI examiner extracts facts from documents',
+    activeDetail: 'Extracting facts, flagging mismatches and missing documents…',
+    doneDetail: 'Evidence report produced',
+  },
+  {
+    icon: Scale,
+    label: 'Policy adjudication',
+    waitingDetail: 'AI adjudicator applies policy to evidence report',
+    activeDetail: 'Interpreting policy wording against the structured evidence…',
+    doneDetail: 'Coverage decision reached',
   },
   {
     icon: Zap,
@@ -47,16 +54,17 @@ const PIPELINE_STEPS = [
     icon: BookOpen,
     label: 'Audit trail',
     waitingDetail: 'Write decision record to database',
-    activeDetail: 'Saving decision, reasoning, and audit record…',
+    activeDetail: 'Saving both pass outputs and full audit record…',
     doneDetail: 'Audit record saved',
   },
 ]
 
 // ── Hook: step-by-step progression ───────────────────────────────────────────
 //
-// Steps 0–1 advance on fixed timers (they happen in milliseconds on the
-// backend). Step 2 (LLM) stays active until isFinalStatus is true.
-// Steps 3–4 then complete quickly so the result appears right after.
+// Steps 0–1 advance on fixed timers (backend completes them in milliseconds).
+// Step 2 (evidence analysis, Haiku) advances after ~6s — a conservative estimate
+// for the first LLM pass. Step 3 (policy adjudication, Sonnet) stays active
+// until isFinalStatus is true. Steps 4–5 then complete quickly.
 
 function usePipelineStep(claimId: string | null, isFinalStatus: boolean): number {
   const [step, setStep] = useState(-1)
@@ -74,26 +82,26 @@ function usePipelineStep(claimId: string | null, isFinalStatus: boolean): number
     clearAll()
     submittedAt.current = Date.now()
     setStep(0)
-    timers.current.push(setTimeout(() => setStep(s => Math.max(s, 1)), 1200))
-    timers.current.push(setTimeout(() => setStep(s => Math.max(s, 2)), 2800))
+    timers.current.push(setTimeout(() => setStep(s => Math.max(s, 1)), 1200))  // eligibility checks
+    timers.current.push(setTimeout(() => setStep(s => Math.max(s, 2)), 2800))  // evidence analysis
+    timers.current.push(setTimeout(() => setStep(s => Math.max(s, 3)), 9000))  // policy adjudication (~6s for pass 1)
     return clearAll
   }, [claimId])
 
   // Complete remaining steps when the real result arrives.
   // For fast rule-engine rejections the result lands within seconds, so we
   // enforce a minimum elapsed time before starting the completion sequence —
-  // this ensures the early steps (policy retrieval, eligibility checks) have
-  // had enough visible dwell time before the pipeline wraps up.
+  // this ensures the early steps have had enough visible dwell time.
   useEffect(() => {
     if (!isFinalStatus || !claimId) return
     const elapsed = Date.now() - submittedAt.current
     const delay = Math.max(0, 3000 - elapsed)
     const t = setTimeout(() => {
       clearAll()
-      setStep(s => Math.max(s, 2))
-      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 3)), 700))
-      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 4)), 1400))
-      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 5)), 2100))
+      setStep(s => Math.max(s, 3))
+      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 4)), 700))   // structured decision
+      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 5)), 1400))  // audit trail
+      timers.current.push(setTimeout(() => setStep(s => Math.max(s, 6)), 2100))  // all done
     }, delay)
     timers.current.push(t)
     return clearAll

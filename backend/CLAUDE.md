@@ -21,7 +21,8 @@ Interactive API docs at `http://localhost:8000/docs`.
 | `SUPABASE_URL` | yes | `https://<ref>.supabase.co` |
 | `SUPABASE_SERVICE_KEY` | yes | Service role key — bypasses RLS |
 | `ANTHROPIC_API_KEY` | yes | `sk-ant-...` |
-| `CLAUDE_MODEL` | no | Default: `claude-sonnet-4-6` |
+| `CLAUDE_MODEL` | no | Default: `claude-sonnet-4-6` — used for Pass 2 (policy adjudicator) |
+| `CLAUDE_EVIDENCE_MODEL` | no | Default: `claude-haiku-4-5-20251001` — used for Pass 1 (evidence analyst) |
 | `CONFIDENCE_APPROVE` | no | Default: `0.80` — LLM confidence ≥ this → approved |
 | `CONFIDENCE_REJECT` | no | Default: `0.50` — below this → rejected; between → needs_more_info |
 | `ENVIRONMENT` | no | `development` (allows all CORS) or `production` |
@@ -80,10 +81,11 @@ backend/
 │   ├── mock_policies.json     10 hardcoded policy profiles
 │   └── master_policy.pdf      Full policy wording PDF
 ├── engine/
-│   ├── model.py               assess_claim() — single Claude API call
+│   ├── model.py               analyse_evidence() [Pass 1] + assess_claim() [Pass 2]
 │   ├── rule_engine.py         pre_check() + post_check()
 │   └── prompts/
-│       └── claim_assessment_system_prompt.txt
+│       ├── evidence_analyst_system_prompt.txt      Pass 1 — document extraction role
+│       └── claim_assessment_system_prompt.txt      Pass 2 — policy adjudication role
 ├── scripts/
 │   └── upload_demo_docs.py    Generates 8 demo PDFs via fpdf2 and uploads to Supabase Storage
 │                              Run once: uv run python scripts/upload_demo_docs.py
@@ -113,13 +115,16 @@ Called as a background task after claim creation. Each step in order:
 4. get_mock_wording() → PolicyWording (PDF extracted text, cached in memory)
 5. rule_engine.pre_check(case, policy_schedule)
    → If violation: update DB (status=rejected, summary=violation.reason), return
-6. engine.model.assess_claim(wording, schedule, case) → ClaimDecision
-7. rule_engine.post_check(decision, policy_schedule) → ClaimDecision (modified)
-8. update_decision(db, case_id, status, summary, approved_amount, assessment_detail)
+6. engine.model.analyse_evidence(schedule, case) → EvidenceReport   [Pass 1 — Haiku]
+   → Insert row into claim_llm_passes (pass1_* columns)
+7. engine.model.assess_claim(wording, schedule, case, evidence) → ClaimDecision   [Pass 2 — Sonnet]
+   → Update claim_llm_passes row (pass2_* columns)
+8. rule_engine.post_check(decision, policy_schedule) → ClaimDecision (modified)
+9. update_decision(db, case_id, status, summary, approved_amount, assessment_detail)
 
 Errors:
   PolicyNotFoundError → status=rejected
-  LLMAssessmentError  → status=failed
+  LLMAssessmentError  → status=failed (pass1 row may exist in claim_llm_passes if Pass 1 succeeded)
   Any other Exception → status=failed (and re-raised)
 ```
 
@@ -152,27 +157,48 @@ Returns `RuleViolation(rule, reason)` or `None`.
 
 ## LLM integration (`engine/model.py`)
 
-Single async function: `assess_claim(policy_wording, policy_schedule, case) → ClaimDecision`
+Two async functions forming a sequential two-pass pipeline.
 
-**Model:** `claude-sonnet-4-6` (configurable via `CLAUDE_MODEL`)
-**Client:** `AsyncAnthropic`, created once via `@functools.cache`, max 3 retries
-**Output:** forced via `tool_choice={"type":"tool","name":"submit_claim_decision"}` — no fallback parsing
-**Schema:** `_TOOL_SCHEMA = ClaimDecision.model_json_schema()` — derived from Pydantic model at import time
+---
 
-### Prompt blocks (assembled per call)
+### Pass 1 — `analyse_evidence(policy_schedule, case) → tuple[EvidenceReport, dict]`
+
+**Model:** `claude-haiku-4-5-20251001` (configurable via `CLAUDE_EVIDENCE_MODEL`)
+**Purpose:** Extract and structure all evidence from uploaded documents. Does not access policy wording or make coverage decisions.
+**Output:** `EvidenceReport` via `tool_choice={"type":"tool","name":"submit_evidence_report"}`
+**Also returns:** `usage` dict with `input_tokens`, `output_tokens`, `cache_read_tokens`
 
 | # | Block | Cached? | Content |
 |---|---|---|---|
-| sys | System prompt | Yes (ephemeral) | Role, task methodology, confidence table, anti-hallucination |
-| 1 | Policy wording | Yes (ephemeral) | Full extracted PDF text — same for all claims on same tier |
+| sys | Evidence analyst prompt | Yes (ephemeral) | Extraction role, expected-doc mapping by reason, fraud signals, quality rubric |
+| 1 | Policy schedule | No | Holder identity + coverage dates — for cross-referencing against documents |
+| 2 | Claim form data | No | Dates, costs, reason, description — user text wrapped in XML tags |
+| 3 | Documents | No | Each file as `image` or `document` block by Supabase Storage URL |
+| 4 | Final instruction | No | "Extract facts and produce your evidence report" |
+
+---
+
+### Pass 2 — `assess_claim(policy_wording, policy_schedule, case, evidence) → tuple[ClaimDecision, dict]`
+
+**Model:** `claude-sonnet-4-6` (configurable via `CLAUDE_MODEL`)
+**Purpose:** Apply policy wording to the structured evidence report and produce a coverage decision.
+**Output:** `ClaimDecision` via `tool_choice={"type":"tool","name":"submit_claim_decision"}`
+**Also returns:** `usage` dict with `input_tokens`, `output_tokens`, `cache_read_tokens`
+
+| # | Block | Cached? | Content |
+|---|---|---|---|
+| sys | Adjudicator prompt | Yes (ephemeral) | Policy interpretation role, evidence quality guidance, confidence table |
+| 1 | Policy wording | Yes (ephemeral) | Full extracted PDF text — no volatile document URLs follow it, improving cache hit rate |
 | 2 | Policy schedule | No | Per-customer: limits, dates, deductibles, claim history |
 | 3 | Claim form data | No | Dates, costs, description — user text wrapped in XML tags |
-| 4 | Documents | No | Each file as `image` or `document` block by Supabase Storage URL |
-| 5 | Final instruction | No | "Base every conclusion on explicit evidence…" |
+| 4 | Evidence Report | No | Structured output from Pass 1: quality rating, discrepancies, fraud signals, narrative |
+| 5 | Final instruction | No | "Apply policy to the evidence above" |
+
+---
 
 ### Confidence thresholds in system prompt
 
-The values from `config.py` are injected at startup:
+The values from `config.py` are injected into the Pass 2 prompt at startup:
 ```python
 template.format(approve_threshold="0.80", reject_threshold="0.50", approve_pct=80)
 ```
@@ -180,16 +206,17 @@ This keeps the prompt and the `post_check()` enforcement always in sync.
 
 ### Prompt injection protection
 
-Free-text user fields are wrapped in XML tags before being placed in the prompt:
+Free-text user fields are wrapped in XML tags in both passes:
 - `<claimant_name>`, `<booking_reference>`, `<claimant_description>`
 
-Structured fields (dates, costs) bypass the LLM entirely — validated by rule engine from typed Python values.
+Structured fields (dates, costs) bypass the LLM entirely — validated by the rule engine from typed Python values.
 
 ### Response parsing
 
 ```python
 tool_block = next(b for b in response.content if b.type == "tool_use")
-return ClaimDecision.model_validate(tool_block.input)
+return EvidenceReport.model_validate(tool_block.input), usage   # Pass 1
+return ClaimDecision.model_validate(tool_block.input), usage    # Pass 2
 ```
 
 Pydantic validates directly. Any failure raises `LLMAssessmentError`.
@@ -198,7 +225,19 @@ Pydantic validates directly. Any failure raises `LLMAssessmentError`.
 
 ## Models
 
-### `ClaimDecision` (LLM output — `models/decision.py`)
+### `EvidenceReport` (Pass 1 output — `models/decision.py`)
+
+```python
+class EvidenceReport(BaseModel):
+    document_extractions: list[DocumentExtraction]
+    cross_document_discrepancies: list[str]
+    missing_expected_documents: list[str]
+    fraud_signals: list[str]
+    evidence_quality: Literal["strong", "adequate", "weak", "insufficient"]
+    evidence_narrative: str
+```
+
+### `ClaimDecision` (Pass 2 output — `models/decision.py`)
 
 ```python
 class DocumentExtraction(BaseModel):
@@ -214,7 +253,7 @@ class PolicyComplianceCheck(BaseModel):
     compliance_notes: str
 
 class ClaimDecision(BaseModel):
-    document_extractions: list[DocumentExtraction]
+    document_extractions: list[DocumentExtraction]  # populated from EvidenceReport by pipeline
     policy_compliance: PolicyComplianceCheck
     decision: Literal["approved", "rejected", "needs_more_info"]
     confidence: float          # 0.0–1.0 probability of approval
@@ -261,6 +300,14 @@ Written to `claim_case.assessment_detail` for every LLM-processed claim:
 
 ```json
 {
+  "evidence_report": {
+    "document_extractions": [...],
+    "cross_document_discrepancies": [],
+    "missing_expected_documents": [],
+    "fraud_signals": [],
+    "evidence_quality": "strong",
+    "evidence_narrative": "..."
+  },
   "document_extractions": [
     {
       "document_type": "physician_statement",
@@ -280,4 +327,6 @@ Written to `claim_case.assessment_detail` for every LLM-processed claim:
 }
 ```
 
-This is the full audit trail. Note: `assessment_detail` is NOT returned by the status endpoint (`ClaimStatusResponse`). Only `decision_summary` and `approved_amount` are surfaced to the frontend.
+`evidence_report` is the full `EvidenceReport` from Pass 1. `document_extractions` duplicates `evidence_report.document_extractions` at the top level for backwards compatibility. `assessment_detail` is NOT returned by the status endpoint (`ClaimStatusResponse`) — only `decision_summary` and `approved_amount` are surfaced to the frontend.
+
+The full Pass 1 and Pass 2 outputs (including token usage) are also stored separately in `claim_llm_passes` — one row per claim, written immediately after each pass completes.

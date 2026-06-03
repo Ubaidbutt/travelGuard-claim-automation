@@ -8,7 +8,8 @@ class Settings(BaseSettings):
 
     # Anthropic
     anthropic_api_key: str
-    claude_model: str = "claude-sonnet-4-6"
+    claude_model: str = "claude-sonnet-4-6"          # Pass 2 — policy adjudicator
+    claude_evidence_model: str = "claude-haiku-4-5-20251001"  # Pass 1 — evidence analyst
 
     # Pipeline — single source of truth for confidence thresholds.
     # These values are injected into the system prompt template and used

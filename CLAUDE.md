@@ -1,6 +1,6 @@
 # TravelGuard — AI Claims Adjudication
 
-An AI-powered travel insurance claims processing platform. Claimants submit a trip cancellation claim through a guided web form. The system retrieves their policy, runs deterministic eligibility rules, sends the policy wording and proof documents to Claude, and produces a structured decision — approved, rejected, or needs review — typically in under 60 seconds.
+An AI-powered travel insurance claims processing platform. Claimants submit a trip cancellation claim through a guided web form. The system retrieves their policy, runs deterministic eligibility rules, then runs a two-pass AI pipeline: a first model extracts and structures evidence from the uploaded documents, and a second model applies the policy wording to that structured evidence to produce a decision — approved, rejected, or needs review — typically in under 60 seconds.
 
 This is a fully working end-to-end proof of concept. Scope is deliberate: one claim type (trip cancellation), one mocked insurer (NN Travel), minimal frontend. The AI layer gets the engineering attention it deserves before the integration layer is expanded.
 
@@ -36,20 +36,22 @@ FastAPI Backend (Railway)
   ├── GET  /claims/{id}     Current status, decision summary, approved amount
   └── POST /claims/validate-policy   Step-1 policy lookup + holder verification
   │
-  ▼ BackgroundTask (~10–30s)
+  ▼ BackgroundTask (~15–40s)
 Pipeline service
   ├── 1. Fetch full case from DB
-  ├── 2. MockNNTravelAdapter.fetch()   → PolicySchedule
-  ├── 3. get_mock_wording()            → PolicyWording (cached PDF text)
-  ├── 4. rule_engine.pre_check()       → hard reject if ineligible (no LLM call)
-  ├── 5. engine.model.assess_claim()   → Claude via Anthropic SDK (tool_use)
-  ├── 6. rule_engine.post_check()      → confidence thresholds + coverage cap
-  └── 7. update_decision()             → writes status, summary, amount, audit JSONB
+  ├── 2. MockNNTravelAdapter.fetch()      → PolicySchedule
+  ├── 3. get_mock_wording()               → PolicyWording (cached PDF text)
+  ├── 4. rule_engine.pre_check()          → hard reject if ineligible (no LLM call)
+  ├── 5. engine.model.analyse_evidence()  → EvidenceReport  (Pass 1 — Haiku)
+  ├── 6. engine.model.assess_claim()      → ClaimDecision   (Pass 2 — Sonnet)
+  ├── 7. rule_engine.post_check()         → confidence thresholds + coverage cap
+  └── 8. update_decision()                → writes status, summary, amount, audit JSONB
   │
   ▼
 Supabase (Postgres + Storage)
-  ├── claim_case table       All case data, decision, full audit JSONB
-  └── claim-documents bucket Uploaded proof files (public read)
+  ├── claim_case table        All case data, decision, full audit JSONB
+  ├── claim_llm_passes table  Per-claim record of both LLM pass outputs + token usage
+  └── claim-documents bucket  Uploaded proof files (public read)
 ```
 
 ---
@@ -88,7 +90,7 @@ Both must be running for the full flow to work. The claim form (`/submit`) and s
 
 ## Database schema
 
-Single table. No joins, no separate decision table.
+Two tables. `claim_case` holds all claim data and the final decision. `claim_llm_passes` holds the full output of both AI passes for every claim, linked by `claim_id`.
 
 ```sql
 CREATE TABLE claim_case (
@@ -112,15 +114,38 @@ CREATE TABLE claim_case (
   status               TEXT          NOT NULL DEFAULT 'pending',
   decision_summary     TEXT,
   approved_amount      NUMERIC(10,2),
-  assessment_detail    JSONB,        -- full LLM audit: extractions, compliance, reasoning, confidence
+  assessment_detail    JSONB,        -- full LLM audit: evidence_report, compliance, reasoning, confidence
   created_at           TIMESTAMPTZ   NOT NULL DEFAULT now(),
   updated_at           TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_claim_case_claim_id ON claim_case(claim_id);
+
+CREATE TABLE claim_llm_passes (
+  id                       UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  claim_id                 TEXT         NOT NULL UNIQUE REFERENCES claim_case(claim_id),
+
+  -- Pass 1 — Evidence Analyst (claude-haiku-4-5-20251001)
+  pass1_model              TEXT,
+  pass1_output             JSONB,        -- full EvidenceReport
+  pass1_input_tokens       INT,
+  pass1_output_tokens      INT,
+  pass1_cache_read_tokens  INT,
+
+  -- Pass 2 — Policy Adjudicator (claude-sonnet-4-6)
+  pass2_model              TEXT,
+  pass2_output             JSONB,        -- full ClaimDecision
+  pass2_input_tokens       INT,
+  pass2_output_tokens      INT,
+  pass2_cache_read_tokens  INT,
+
+  created_at               TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
 ```
 
 Status lifecycle: `pending` → `processing` → `approved` | `rejected` | `needs_more_info` | `failed`
+
+`claim_llm_passes` is written in two steps: Pass 1 output is inserted immediately after evidence analysis completes (so it is preserved even if Pass 2 fails), then Pass 2 columns are updated once adjudication finishes.
 
 ---
 
@@ -143,16 +168,20 @@ Status lifecycle: `pending` → `processing` → `approved` | `rejected` | `need
 
 ## Key design decisions
 
-**Direct Anthropic SDK, not LangChain.** One well-structured Claude call, typed Pydantic response, deterministic rule checks. Every step is readable Python.
+**Direct Anthropic SDK, not LangChain.** Two focused Claude calls, typed Pydantic responses, deterministic rule checks. Every step is readable Python.
 
-**Policy wording as source of truth.** Claude receives the actual policy PDF text — not a pre-extracted rule list. Coverage decisions reflect precise legal wording, not a hardcoded lookup.
+**Two-pass AI pipeline.** Evidence extraction and policy adjudication are separate LLM calls with separate system prompts. Pass 1 (Haiku) reads raw documents and produces a structured `EvidenceReport`. Pass 2 (Sonnet) receives that report and applies the policy wording to reach a decision. Separating these tasks means each model has a focused job, improves accuracy on complex claims, and makes failures easier to diagnose.
 
-**Rule engine separated from LLM.** Hard facts (dates, policy status, arithmetic) are checked in Python before Claude is ever called. Claude only evaluates qualitative policy compliance.
+**Model split by cognitive load.** Pass 1 is extraction and cross-referencing — well within Haiku's capability and faster. Pass 2 is legal interpretation under uncertainty — benefits from Sonnet's stronger reasoning. Both models are independently configurable via `CLAUDE_EVIDENCE_MODEL` and `CLAUDE_MODEL` in the environment.
 
-**Confidence thresholds as single source of truth.** `config.py` values are injected into the system prompt template at startup and read again by `post_check()`. If thresholds change, both the prompt and enforcement logic update together automatically.
+**Policy wording as source of truth.** Pass 2 receives the actual policy PDF text — not a pre-extracted rule list. Coverage decisions reflect precise legal wording, not a hardcoded lookup.
 
-**Prompt caching.** System prompt and policy wording are marked `cache_control: ephemeral`. All claims on the same product tier amortize the cost of the wording block (largest block, 5,000–15,000 tokens).
+**Rule engine separated from LLM.** Hard facts (dates, policy status, arithmetic) are checked in Python before any LLM is called. The LLM layer only evaluates qualitative evidence and policy compliance.
 
-**XML delimiters on user-controlled fields.** Free-text claimant fields (`full_name`, `booking_reference`, `description`) are wrapped in XML tags to prevent prompt injection.
+**Confidence thresholds as single source of truth.** `config.py` values are injected into the Pass 2 system prompt at startup and read again by `post_check()`. If thresholds change, both the prompt and enforcement logic update together automatically.
 
-**Forced structured output.** `tool_choice: {type: "tool", name: "submit_claim_decision"}` guarantees a machine-parseable `ClaimDecision` response. No regex, no fallback parsing — Pydantic validates directly.
+**Prompt caching.** Both system prompts are marked `cache_control: ephemeral`. The policy wording block in Pass 2 is also cached — and because Pass 2 has no volatile document URLs in its context, cache hit rates are higher than a single-call approach.
+
+**XML delimiters on user-controlled fields.** Free-text claimant fields (`full_name`, `booking_reference`, `description`) are wrapped in XML tags in both passes to prevent prompt injection.
+
+**Forced structured output.** Both passes use `tool_choice: {type: "tool"}` — Pass 1 produces `EvidenceReport`, Pass 2 produces `ClaimDecision`. No regex, no fallback parsing — Pydantic validates directly.
