@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { ClaimResult } from '@/components/ClaimResult'
 import { useClaimStatus } from '@/hooks/useClaimStatus'
-import { submitClaim } from '@/lib/api'
+import { submitDemoClaim } from '@/lib/api'
 import { getDemoProfiles, type DemoProfile } from '@/lib/demoProfiles'
 
 // ── Pipeline step definitions ─────────────────────────────────────────────────
@@ -446,7 +446,7 @@ export default function DemoPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      const result = await submitClaim(selectedProfile.payload)
+      const result = await submitDemoClaim(selectedProfile.id)
       setClaimId(result.claim_id)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to submit demo claim')

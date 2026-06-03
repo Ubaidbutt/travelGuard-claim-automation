@@ -1,11 +1,35 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException
-from models.claim import ClaimCreateRequest, ClaimCreateResponse, ClaimStatusResponse, PolicyValidateRequest
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from models.claim import ClaimCreateRequest, ClaimCreateResponse, ClaimStatusResponse, DemoClaimRequest, PolicyValidateRequest
 from services import claim_service, pipeline_service
 from adapters.router import get_adapter
 from adapters.mock_nn_travel import PolicyNotFoundError
 from db.client import get_db
+from engine.demo_profiles import build_demo_payload
+from utils.rate_limit import GlobalDailyCounter, IPRateLimiter
+from config import settings
 
 router = APIRouter(prefix="/claims", tags=["claims"])
+
+_demo_ip_limiter = IPRateLimiter(
+    max_requests=settings.demo_rate_limit,
+    window_minutes=60,
+)
+_demo_daily_counter = GlobalDailyCounter(max_per_day=settings.demo_daily_cap)
+
+
+@router.post("/demo", status_code=201, response_model=ClaimCreateResponse)
+async def submit_demo_claim(
+    body: DemoClaimRequest,
+    background_tasks: BackgroundTasks,
+    request: Request,
+) -> ClaimCreateResponse:
+    _demo_daily_counter.check()
+    _demo_ip_limiter.check(request)
+    payload = build_demo_payload(body.profile_id)
+    db = get_db()
+    case = await claim_service.create(db, payload)
+    background_tasks.add_task(pipeline_service.process, case["id"])
+    return ClaimCreateResponse(claim_id=case["claim_id"], status="pending")
 
 
 @router.post("", status_code=201, response_model=ClaimCreateResponse)

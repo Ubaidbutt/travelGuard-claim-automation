@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     confidence_approve: float = 0.80
     confidence_reject: float = 0.50
 
+    # Demo protection
+    demo_rate_limit: int = 5        # max demo runs per IP per hour
+    demo_daily_cap: int = 50        # max total demo runs per day globally
+
     # App
     environment: str = "development"
     frontend_url: str = "http://localhost:3000"

@@ -24,6 +24,21 @@ export async function submitClaim(
   return res.json()
 }
 
+export async function submitDemoClaim(
+  profileId: string
+): Promise<{ claim_id: string; status: string }> {
+  const res = await fetch(`${BASE_URL}/claims/demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile_id: profileId }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error((err as { detail?: string }).detail ?? 'Failed to submit demo claim')
+  }
+  return res.json()
+}
+
 export async function validatePolicy(payload: {
   policy_number: string
   email: string

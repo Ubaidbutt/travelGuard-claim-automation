@@ -3,6 +3,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Literal
 
+DemoProfileId = Literal["approval", "expired_policy", "wrong_documents", "needs_more_info"]
+
 
 CancellationReason = Literal[
     "illness_claimant",
@@ -114,3 +116,7 @@ class PolicyValidateRequest(BaseModel):
     policy_number: str
     email: EmailStr
     date_of_birth: date
+
+
+class DemoClaimRequest(BaseModel):
+    profile_id: DemoProfileId
